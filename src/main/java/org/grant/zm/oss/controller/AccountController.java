@@ -1,0 +1,57 @@
+package org.grant.zm.oss.controller;
+
+import lombok.extern.slf4j.Slf4j;
+import org.grant.zm.oss.base.Result;
+import org.grant.zm.oss.base.ResultBuilder;
+import org.grant.zm.oss.service.OssService;
+import org.grant.zm.oss.store.AccountInfo;
+import org.grant.zm.oss.utils.AccountUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import javax.validation.constraints.NotEmpty;
+import java.io.IOException;
+/**
+ * 账户接口
+ */
+@Slf4j
+@RestController
+@RequestMapping("account")
+public class AccountController extends BaseController {
+
+    @Autowired
+    OssService ossService;
+
+    @GetMapping("/create")
+    public Result create(@Validated AccountInfo accountInfo, BindingResult result) {
+        if (result.hasErrors()){
+            return failValidate(result);
+        }
+        String str = AccountUtils.randomAccess();
+        try {
+            ossService.createAccountDir(str, accountInfo);
+        } catch (IOException e) {
+            ResultBuilder.fail("目录创建失败");
+        }
+        return ResultBuilder.ok().body(str);
+    }
+
+    @GetMapping("/edit")
+    public Result edit(@Validated AccountInfo accountInfo, @NotEmpty @RequestHeader("access") String access, BindingResult result) {
+        if (result.hasErrors()){
+            return failValidate(result);
+        }
+        try {
+            boolean isT = ossService.editAccountInfo(access, accountInfo);
+            if (!isT) return ResultBuilder.fail("用户信息修改失败");
+        } catch (IOException e) {
+            ResultBuilder.fail("用户信息修改失败");
+        }
+        return ResultBuilder.ok();
+    }
+}
