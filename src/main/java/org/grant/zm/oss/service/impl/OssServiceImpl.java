@@ -1,8 +1,10 @@
 package org.grant.zm.oss.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
+import org.grant.zm.oss.base.StoreType;
 import org.grant.zm.oss.config.OssConfig;
 import org.grant.zm.oss.service.OssService;
+import org.grant.zm.oss.service.RedisService;
 import org.grant.zm.oss.store.AccountInfo;
 import org.grant.zm.oss.store.FileInfos;
 import org.grant.zm.oss.utils.AccountUtils;
@@ -26,6 +28,8 @@ public class OssServiceImpl implements OssService {
 
     @Autowired
     OssConfig ossConfig;
+    @Autowired
+    RedisService redisService;
 
     @Override
     public void createAccountDir(String access, AccountInfo accountInfo) throws IOException {
@@ -35,9 +39,15 @@ public class OssServiceImpl implements OssService {
     }
 
     @Override
+    public boolean isAccount(String access) {
+        Path path = Paths.get(ossConfig.getDir(), access);
+        return path.toFile().exists();
+    }
+
+    @Override
     public boolean editAccountInfo(String access, AccountInfo accountInfo) throws IOException {
         Path path = Paths.get(ossConfig.getDir(), access);
-        if (path.toFile().exists()){
+        if (isAccount(access)){
             AccountUtils.wirteAccountInfo(path.toString(), accountInfo);
         }
         return path.toFile().exists();
@@ -48,7 +58,8 @@ public class OssServiceImpl implements OssService {
         FileInfos fileInfos = null;
         try {
             String fileId = FileUtils.upload(multipartFile,  Paths.get(ossConfig.getDir(), access).toString());
-            fileInfos = new FileInfos(fileId, access);
+            fileInfos = new FileInfos(fileId, access, StoreType.LOCAL);
+            redisService.addFileId(fileInfos);
         } catch (IOException e) {
             log.error("文件上传失败 access={}", access);
             return null;
@@ -68,11 +79,20 @@ public class OssServiceImpl implements OssService {
 
     @Override
     public InputStream getFile(String fileId) {
+        FileInfos fileInfos = redisService.getFileInfos(fileId);
+        if (fileInfos == null) return null;
         try {
-            return Files.newInputStream(Paths.get(ossConfig.getDir(), "x8R-IHzb-PA8t-YECY-XyWV-4foZ-CsfX-3k7g", fileId));
+            if (StoreType.LOCAL.equals(fileInfos.getStoreType())) {
+                return Files.newInputStream(Paths.get(ossConfig.getDir(), fileInfos.getAccess() , fileId));
+            }else {
+                return null;
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
         return null;
     }
+
+
+
 }

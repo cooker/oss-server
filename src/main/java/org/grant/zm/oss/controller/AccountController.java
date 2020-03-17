@@ -1,5 +1,6 @@
 package org.grant.zm.oss.controller;
 
+import io.swagger.annotations.*;
 import lombok.extern.slf4j.Slf4j;
 import org.grant.zm.oss.base.Result;
 import org.grant.zm.oss.base.ResultBuilder;
@@ -22,12 +23,14 @@ import java.io.IOException;
 @Slf4j
 @RestController
 @RequestMapping("account")
+@Api("account-api")
 public class AccountController extends BaseController {
 
     @Autowired
     OssService ossService;
 
     @GetMapping("/create")
+    @ApiOperation("创建用户")
     public Result create(@Validated AccountInfo accountInfo, BindingResult result) {
         if (result.hasErrors()){
             return failValidate(result);
@@ -42,6 +45,8 @@ public class AccountController extends BaseController {
     }
 
     @GetMapping("/edit")
+    @ApiOperation("编辑用户")
+    @BasicAuthDefinition(key = "access", description = "用户凭证")
     public Result edit(@Validated AccountInfo accountInfo, @NotEmpty @RequestHeader("access") String access, BindingResult result) {
         if (result.hasErrors()){
             return failValidate(result);

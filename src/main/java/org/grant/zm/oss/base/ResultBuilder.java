@@ -27,6 +27,13 @@ public class ResultBuilder {
         return result;
     }
 
+    public static Result auth_fail(){
+        Result result = build();
+        result.setCode(Contansts.auth_fail);
+        result.setMessage("认证失败");
+        return result;
+    }
+
     public static Result build(){
         return new Result();
     }

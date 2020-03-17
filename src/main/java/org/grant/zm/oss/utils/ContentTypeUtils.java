@@ -21,6 +21,7 @@ public class ContentTypeUtils {
                 tSuffix = "video/mpeg4";
                 break;
             default:
+                tSuffix = "multipart/form-data";
                 break;
         }
 

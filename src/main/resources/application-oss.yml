@@ -1,0 +1,3 @@
+oss:
+  winDir: ./oss
+  linuxDir: ./oss

@@ -1,5 +1,8 @@
 package org.grant.zm.oss.controller;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.BasicAuthDefinition;
 import io.vavr.API;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
@@ -9,7 +12,6 @@ import org.grant.zm.oss.service.OssService;
 import org.grant.zm.oss.store.FileInfos;
 import org.grant.zm.oss.utils.ContentTypeUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -23,15 +25,17 @@ import java.io.InputStream;
  * 资源接口
  */
 @Slf4j
-@Controller
+@RestController
 @RequestMapping("/resource")
+@Api("resource-api")
 public class ResourceController extends BaseController{
 
     @Autowired
     OssService ossService;
 
     @PutMapping("/put")
-    @ResponseBody
+    @ApiOperation("上传文件")
+    @BasicAuthDefinition(key = "access", description = "用户凭证")
     public Result put(@RequestParam("file") MultipartFile multipartFile, @NotNull @RequestHeader("access") String access){
         FileInfos fileInfos = ossService.putFile(access, multipartFile);
         if (fileInfos == null) {
@@ -41,12 +45,14 @@ public class ResourceController extends BaseController{
     }
 
     @DeleteMapping("/delete")
-    @ResponseBody
-    public Result delete(@NotEmpty String fileId, @NotNull @RequestHeader("access") String access){
+    @ApiOperation("删除文件")
+    @BasicAuthDefinition(key = "access", description = "用户凭证")
+    public Result delete(@NotEmpty @RequestParam("fileId") String fileId, @NotNull @RequestHeader("access") String access){
         return ossService.deleteFile(access, fileId) ? ResultBuilder.ok() : ResultBuilder.fail();
     }
 
     @GetMapping("/get/{fileId}")
+    @ApiOperation("获取文件")
     public void getFile(@PathVariable("fileId") String fileId, HttpServletResponse response){
         InputStream fin = null;
         try {
@@ -56,6 +62,7 @@ public class ResourceController extends BaseController{
                 return;
             }
             response.setContentType(ContentTypeUtils.getContentType(fileId.substring(fileId.lastIndexOf(".") + 1)));
+            response.setHeader("Content-Disposition", "attachment;fileName="+fileId);
             IOUtils.copy(fin, response.getOutputStream());
         }catch (IOException e){
             log.error("文件下载失败", e);
@@ -66,6 +73,7 @@ public class ResourceController extends BaseController{
     }
 
     @GetMapping("/preview")
+    @ApiOperation("预览文件")
     public void previewFile(String fileId){
         API.TODO("待开发");
     }

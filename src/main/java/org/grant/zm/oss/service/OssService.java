@@ -12,6 +12,7 @@ import java.io.InputStream;
  */
 public interface OssService {
     void createAccountDir(String access, AccountInfo accountInfo) throws IOException;
+    boolean isAccount(String access);
     boolean editAccountInfo(String access, AccountInfo accountInfo) throws IOException;
     FileInfos putFile(String access, MultipartFile multipartFile);
     boolean deleteFile(String access, String fileId);
