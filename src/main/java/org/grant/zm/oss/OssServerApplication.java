@@ -7,7 +7,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 
 @EnableAsync
 @EnableAspectJAutoProxy
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = "org.grant.zm")
 public class OssServerApplication {
 
     public static void main(String[] args) {

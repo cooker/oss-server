@@ -7,6 +7,7 @@ import org.grant.zm.oss.base.ResultBuilder;
 import org.grant.zm.oss.service.OssService;
 import org.grant.zm.oss.store.AccountInfo;
 import org.grant.zm.oss.utils.AccountUtils;
+import org.grant.zm.spring2.annotation.GLog;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
@@ -31,6 +32,7 @@ public class AccountController extends BaseController {
 
     @GetMapping("/create")
     @ApiOperation("创建用户")
+    @GLog(value = "创建用户")
     public Result create(@Validated AccountInfo accountInfo, BindingResult result) {
         if (result.hasErrors()){
             return failValidate(result);
@@ -46,6 +48,7 @@ public class AccountController extends BaseController {
 
     @GetMapping("/edit")
     @ApiOperation("编辑用户")
+    @GLog(value = "编辑用户")
     @BasicAuthDefinition(key = "access", description = "用户凭证")
     public Result edit(@Validated AccountInfo accountInfo, @NotEmpty @RequestHeader("access") String access, BindingResult result) {
         if (result.hasErrors()){

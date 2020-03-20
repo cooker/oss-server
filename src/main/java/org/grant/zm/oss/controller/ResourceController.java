@@ -11,6 +11,7 @@ import org.grant.zm.oss.base.ResultBuilder;
 import org.grant.zm.oss.service.OssService;
 import org.grant.zm.oss.store.FileInfos;
 import org.grant.zm.oss.utils.ContentTypeUtils;
+import org.grant.zm.spring2.annotation.GLog;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -35,6 +36,7 @@ public class ResourceController extends BaseController{
 
     @PutMapping("/put")
     @ApiOperation("上传文件")
+    @GLog(value = "上传文件")
     @BasicAuthDefinition(key = "access", description = "用户凭证")
     public Result put(@RequestParam("file") MultipartFile multipartFile, @NotNull @RequestHeader("access") String access){
         FileInfos fileInfos = ossService.putFile(access, multipartFile);
@@ -46,6 +48,7 @@ public class ResourceController extends BaseController{
 
     @DeleteMapping("/delete")
     @ApiOperation("删除文件")
+    @GLog(value = "删除文件")
     @BasicAuthDefinition(key = "access", description = "用户凭证")
     public Result delete(@NotEmpty @RequestParam("fileId") String fileId, @NotNull @RequestHeader("access") String access){
         return ossService.deleteFile(access, fileId) ? ResultBuilder.ok() : ResultBuilder.fail();
@@ -53,6 +56,7 @@ public class ResourceController extends BaseController{
 
     @GetMapping("/get/{fileId}")
     @ApiOperation("获取文件")
+    @GLog(value = "获取文件")
     public void getFile(@PathVariable("fileId") String fileId, HttpServletResponse response){
         InputStream fin = null;
         try {
@@ -74,6 +78,7 @@ public class ResourceController extends BaseController{
 
     @GetMapping("/preview")
     @ApiOperation("预览文件")
+    @GLog(value = "预览文件")
     public void previewFile(String fileId){
         API.TODO("待开发");
     }
